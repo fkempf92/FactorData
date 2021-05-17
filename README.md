@@ -15,5 +15,15 @@ For this code to work, there you must fulfill three key requirements:
 3. You must have a valid FRED account with access key (see https://research.stlouisfed.org/docs/api/api_key.html)
 
 
+## Example ##
+
+```python
+factors = FactorData(wrds_username='janedoe', bls_key='1234', fred_key='abcd', start_yr=1980)
+factors.get_data()
+factors.clean_data(how='std')
+factors.save_data(name='data', key='std')
+```
+
+
 ## Disclaimer ##
 Even though this code achieves a very high correlation with Jermiah Green's SAS code, I do not claim that my code is free of errors. Therefore, I am grateful for any feedback or constructive suggestion for improvement.
