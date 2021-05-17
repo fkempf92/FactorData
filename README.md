@@ -1,5 +1,6 @@
 # FactorData
 A large number of PhD students who focus their research on empirical asset pricing are confronted with the problem of accessing and working with data that makes their research comparable to existing studies. In particular, this refers to research working with firm-level characteristics, which are either used directly in regression analyses or indirectly through the construction of sorted long-short portfolio returns. Unfortunately, most papers do not publish their code showing the data download, cleaning and variable definitions. Notable exceptions include Bryan Kelly (https://github.com/bkelly-lab/GlobalFactor) or Jeremiah Green (https://drive.google.com/file/d/0BwwEXkCgXEdRQWZreUpKOHBXOUU/view). In particular, the SAS code provided by Jeremiah Green is frequently cited in recent papers, and as PhD students we are extremely grateful that he made the code available. 
+
 While I was working on my own research, I noticed that I would like to be able to download and clean the data directly in Python, and also to update specific variables according to more recent data availability: for example, in the SAS code published by Jeremiah Green ranges from 1980 to Dec 2016, but more data has become available since then, which requires manual changes to the code (this also include manually inserted updated CPI data).
 
 
