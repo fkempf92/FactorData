@@ -9,7 +9,13 @@ My code provides a simple Python class that downloads, calculates, cleans and sa
 PostgreSQL
 
 ## Notable differences ##
-While my overall correlation with Green's data is very high, there are some notable differences in variables definitions which I would like to point out:
+While my overall correlation with Green's data is very high, there are some notable differences in variables definitions as well as generally diverging aspects which I would like to point out. Note that everyone can change the code in a way that suits best their own needs. This respirotry is merely a suggestion! 
+1. I perform industry adjustments after the CRSP-Compustat merge not before
+2. Industry-adjustments are performed with the stocks from the investment universe only
+3. 
+
+
+
 - xsga0 (this is a helper variable): Green's definition sets the variable to 0
 ```SAS
 if missing(xsga) then xsga0=0; else xsga0=0
@@ -38,6 +44,13 @@ factors.clean_data(how='std')
 factors.save_data(name='data', key='std')
 ```
 
+## Results ## 
+
+The plot below shows the data availability per month from January 1980 to December 2020
+
+The plot below shows the two different versions of the example book-to-market of an arbitrarily sampled stock:
+
+the plot shows the standardised and rank-normalised 
 
 ## Disclaimer ##
 Even though this code achieves a very high correlation with Jermiah Green's SAS code, I do not claim that my code is free of errors. Therefore, I am grateful for any feedback or constructive suggestion for improvement.
