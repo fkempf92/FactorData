@@ -1,9 +1,11 @@
 # FactorData
-This 
+A large number of PhD students who focus their research on empirical asset pricing are confronted with the problem of accessing and working with data that makes their research comparable to existing studies. In particular, this refers to research working with firm-level characteristics, which are either used directly in a regression analysis or indirectly in order to construct long-short portfolios.
+Unfortunately, code showing the data download, cleaning and variable definitions is not frequently published. Notable exceptions include Bryan Kelly (https://github.com/bkelly-lab/GlobalFactor) or Jeremiah Green (https://drive.google.com/file/d/0BwwEXkCgXEdRQWZreUpKOHBXOUU/view). In particular, the SAS code provided by Jeremiah Green is frequently cited in recent papers, and as PhD students we are extremely grateful that he made the code available. 
+While I was working on my own research, I noticed that I would like to be able to download and clean the data directly in Python, and also to update specific variables according to more recent data availability: for example, in the SAS code published by Jeremiah Green ranges from 1980 to Dec 2016. Moreover, CPI data is inserted manually which makes updating tedious.
+My code calculates 103 firm characteristics using data from CRSP, Compustat, I/B/E/S, BLS and FRED. In particular, I follow the variable definitions used by Jeremiah Green and my code achieves an overall correlation of XYZ %. While there may exist different variable definitions, such as those used by Hou et al. 2020, I will leave different variable definitions to future updates. 
 
-
-Calculates 103 firm characteristics from CRSP + Compustat directly in Python – no WRDS SAS cloud
-
+## Notable differences ##
+While my overall correlation with Green's data is very high, there are some notable differences in variables which I would like to point out:
 
 ## Requirements ## 
 For this code to work, there you must fulfill three key requirements:
