@@ -6,12 +6,20 @@ While I was working on my own research, I noticed that I would like to be able t
 
 My code provides a simple Python class that downloads, calculates, cleans and saves 103 firm characteristics using data from CRSP, Compustat, I/B/E/S, BLS and FRED. In particular, I follow the variable definitions used by Jeremiah Green and my code achieves an overall correlation of XYZ %. While there may exist different variable definitions, such as those used by Hou et al. 2020, I will leave different variable definitions to future updates. 
 
+PostgreSQL
+
 ## Notable differences ##
 While my overall correlation with Green's data is very high, there are some notable differences in variables definitions which I would like to point out:
-- xsga0 (this is a helper variable): I do think that there is a small error in the SAS code:
+- xsga0 (this is a helper variable): Green's definition sets the variable to 0
 ```SAS
-if missing(xsga) then xsga0=0;
-							else xsga0=0
+if missing(xsga) then xsga0=0; else xsga0=0
+```
+, whereas mine is 
+```PostgreSQL
+CASE WHEN xsga is null 
+     THEN 0 
+     ELSE xsga
+     END AS xsga0
 ```
 
 ## Requirements ## 
