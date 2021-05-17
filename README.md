@@ -12,7 +12,7 @@ PostgreSQL
 While my overall correlation with Green's data is very high, there are some notable differences in variables definitions as well as generally diverging aspects which I would like to point out. Note that everyone can change the code in a way that suits best their own needs. This respirotry is merely a suggestion! 
 1. I perform industry adjustments after the CRSP-Compustat merge not before
 2. Industry-adjustments are performed with the stocks from the investment universe only
-3. 
+3. Non-negative variables: some of the firm characteristics are by definition non-negative. However, due to adjustments made by Compustat, they can actually be negative. Consequently, in Green's SAS code, the negative outliers are not winsorized (examples include cashdebt, rd_sale or sp). The overall number of stock affected by this is small. I, therefore, make the assumption to use absolute values for non-negative variables to force them to be positive. 
 
 
 
