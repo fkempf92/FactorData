@@ -1,12 +1,10 @@
 # FactorData
 A large number of PhD students who focus their research on empirical asset pricing are confronted with the problem of accessing and working with data that makes their research comparable to existing studies. In particular, this refers to research working with firm-level characteristics, which are either used directly in regression analyses or indirectly through the construction of sorted long-short portfolio returns. Unfortunately, most papers do not publish their code showing the data download, cleaning and variable definitions. Notable exceptions include Bryan Kelly (https://github.com/bkelly-lab/GlobalFactor) or Jeremiah Green (https://drive.google.com/file/d/0BwwEXkCgXEdRQWZreUpKOHBXOUU/view). In particular, the SAS code provided by Jeremiah Green is frequently cited in recent papers, and as PhD students we are extremely grateful that he made the code available. 
 
-While I was working on my own research, I noticed that I would like to be able to download and clean the data directly in Python, and also to update specific variables according to more recent data availability: for example, in the SAS code published by Jeremiah Green ranges from 1980 to Dec 2016, but more data has become available since then, which requires manual changes to the code (this also include manually inserted updated CPI data).
+While I was working on my own research, I noticed that I would like to be able to download and clean the data directly in Python, and also to update specific variables according to more recent data availability: for example, the SAS code published by Jeremiah Green ranges from 1980 to Dec 2014, but more data has become available since then, which requires manual changes to the code (this includes manually inserting CPI data).
 
 
-My code provides a simple Python class that downloads, calculates, cleans and saves 103 firm characteristics using data from CRSP, Compustat, I/B/E/S, BLS and FRED. In particular, I follow the variable definitions used by Jeremiah Green and my code achieves an overall correlation of XYZ %. While there may exist different variable definitions, such as those used by Hou et al. 2020, I will leave different variable definitions to future updates. 
-
-PostgreSQL
+My code provides a simple Python class that downloads, calculates, cleans and saves 103 firm characteristics using data from CRSP, Compustat, I/B/E/S, BLS and FRED. In particular, I follow the variable definitions used by Jeremiah Green and my code achieves an overall median correlation of 98.8% with Green's data. I acknowledge that there may exist diverging variable definitions, such as those used by Hou et al. 2020. I will leave alternative variable definitions to future updates. 
 
 ## Notable differences ##
 While my overall correlation with Green's data is very high, there are some notable differences in variables definitions as well as generally diverging aspects which I would like to point out. Note that everyone can change the code in a way that suits best their own needs. This respirotry is merely a suggestion! 
@@ -38,10 +36,21 @@ For this code to work, there you must fulfill three key requirements:
 ## Example ##
 
 ```python
-factors = FactorData(wrds_username='janedoe', bls_key='1234', fred_key='abcd', start_yr=1980)
+# Set account details and start year
+factors = FactorData(wrds_username='janedoe', 
+                     bls_key='1234', 
+                     fred_key='abcd', 
+                     start_yr=1980)
+# Download data
 factors.get_data()
-factors.clean_data(how='std')
-factors.save_data(name='data', key='std')
+# Clean data
+factors.clean_data(dropna_cols=['mve', 'bm', 'mom1m'], 
+                   how='std', 
+                   keep_micro=True)
+# Save data as .h5 file
+factors.save_data(name='data', 
+                  key='std', 
+                  cleaned=True)
 ```
 
 ## Results ## 
