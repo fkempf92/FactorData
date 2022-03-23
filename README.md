@@ -48,7 +48,7 @@ data.clean_data(dropna_cols=['mve', 'bm', 'mom1m'],
                 how='std', 
                 keep_micro=True)
 # Construct value-weighted quintile L/S portfolio returns, for a subset of characteristics (data must have been clearn in previous step!)
-data.ls_portfolio(weight='value, 
+data.ls_portfolio(weight='value', 
                   q=0.2,
                   chars=['bm', 'mve', 'roeq', 'mom12m'])
 
