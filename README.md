@@ -38,9 +38,9 @@ For this code to work, there you must fulfill three key requirements:
 ```python
 # Set account details and start year
 data = FactorData(wrds_username='janedoe', 
-                     bls_key='1234', 
-                     fred_key='abcd', 
-                     start_yr=1980)
+                  bls_key='1234', 
+                  fred_key='abcd', 
+                  start_yr=1980)
                      
 # Download data, i.e. characteristics
 data.get_data()
