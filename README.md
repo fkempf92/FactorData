@@ -54,8 +54,8 @@ data.ls_portfolio(weight='value',
 
 # Save data as .h5 file
 data.save_data(name='data', 
-                  key='std', 
-                  cleaned=True)
+               key='std', 
+               cleaned=True)
 ```
 
 ## Results ## 
