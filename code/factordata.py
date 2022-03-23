@@ -1711,8 +1711,8 @@ class FactorData(object):
         """
         Constructs characteristics-sorted long/short portfolios
         They can be constructed in 3 key ways:
-        1) equal-weighted: weight = None
-        2) value-weighted: weight = "mve_m"
+        1) equal-weighted: weight = "equal"
+        2) value-weighted: weight = "value"
         3) score-weighted: weight = "score"
 
         :returns
