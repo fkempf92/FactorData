@@ -41,21 +41,28 @@ data = FactorData(wrds_username='janedoe',
                      bls_key='1234', 
                      fred_key='abcd', 
                      start_yr=1980)
+                     
 # Download data, i.e. characteristics
 data.get_data()
+
 # Clean data
 data.clean_data(dropna_cols=['mve', 'bm', 'mom1m'], 
                 how='std', 
                 keep_micro=True)
-# Construct value-weighted quintile L/S portfolio returns, for a subset of characteristics (data must have been clearn in previous step!)
+                
+# Construct value-weighted quintile L/S portfolio returns, for a subset of characteristics
 data.ls_portfolio(weight='value', 
                   q=0.2,
                   chars=['bm', 'mve', 'roeq', 'mom12m'])
 
-# Save data as .h5 file
-data.save_data(name='data', 
+# Save characteristics as .h5 file
+data.save_data(name='characteristics', 
                key='std', 
                cleaned=True)
+               
+# Save factor returns as .h5 file
+data.save_data(name='factors', 
+               key='value')
 ```
 
 ## Results ## 
