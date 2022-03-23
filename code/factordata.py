@@ -1,16 +1,15 @@
-import wrds
-import bls
-import warnings
-import json
-import pandas as pd
-import numpy as np
 import datetime as dt
+import json
+import warnings
+import bls
+import numpy as np
+import pandas as pd
 import scipy.stats as stats
-from pandas.tseries.offsets import MonthEnd
 import statsmodels.api as sm
+import wrds
 from fredapi import Fred
+from pandas.tseries.offsets import MonthEnd
 from statsmodels.regression.rolling import RollingOLS
-warnings.filterwarnings('ignore')
 
 
 class FactorData(object):
@@ -122,12 +121,12 @@ class FactorData(object):
                  fred_key,
                  start_yr=1980,
                  end_yr=None,
-                 linkprim=['P', 'C'],
-                 linktype=['LU', 'LC', 'LS'],
+                 linkprim=('P', 'C'),
+                 linktype=('LU', 'LC', 'LS'),
                  lag_annual=6,
                  lag_quarter=4,
-                 exchcd=[1, 2, 3],
-                 shrcd=[10, 11],
+                 exchcd=(1, 2, 3),
+                 shrcd=(10, 11),
                  indfmt='INDL',
                  datafmt='STD',
                  popsrc='D',
@@ -169,25 +168,25 @@ class FactorData(object):
             raise ValueError('linkprim must be in {}. '.format(
                 valid_lt) + 'Got {}'.format(linktype))
 
-        self.linktype = linktype
+        self.linktype = list(linktype)
 
         if not isinstance(lag_annual, int):
             lag_annual = int(lag_annual)
 
         self.lag_annual = lag_annual
         self.lag_quarter = lag_quarter
-        self.exchcd = exchcd
-        self.shrcd = shrcd
+        self.exchcd = list(exchcd)
+        self.shrcd = list(shrcd)
         self.indfmt = indfmt
         self.datafmt = datafmt
         self.popsrc = popsrc
         self.consol = consol
         self.curcd = curcd
         # convenient for later
-        self.core = None
+        self.chars_list = None
+        self.chars_data = None
+        self.chars_data_clean = None
         self.factors = None
-        self.data = None
-        self.data_clean = None
 
     @staticmethod
     def _std_resid(idx, model):
@@ -320,7 +319,7 @@ class FactorData(object):
                 WHEN f.drlt is not null and f.drc is null 
                 THEN f.drlt
                 END as dr,
-            
+
             CASE WHEN f.dcvt is null AND f.dcpstk is not null AND 
                     f.pstk is not null AND f.dcpstk > f.pstk
                 THEN f.dcpstk-f.pstk
@@ -512,7 +511,7 @@ class FactorData(object):
             a.ceq / NULLIF(a.mve_f, 0) as bm,  
             a.ib / NULLIF(a.mve_f, 0) as ep, 
             (mve_f+dltt-at)/ NULLIF(a.che, 0) as cashpr, 
-            a.dvt /NULLIF(a.mve_f, 0) as dy, 
+            a.dvt / NULLIF(a.mve_f, 0) as dy, 
             a.lt /NULLIF(a.mve_f, 0) as lev, 
             a.sale /NULLIF(a.mve_f, 0) as sp, 
             (a.ebit-a.nopi) / NULLIF((a.ceq+a.lt-a.che), 0) as roic,  
@@ -760,7 +759,7 @@ class FactorData(object):
                     ELSE NULL
                     END AS orgcap_1, */
             c.splticrm
-            
+
             FROM compa AS a 
 
             INNER JOIN ccm AS b 
@@ -800,7 +799,7 @@ class FactorData(object):
 
             ON data.permno=mse.permno
             AND data.datadate BETWEEN mse.exchstdt AND mse.exchedt
-            
+
             WINDOW w1 as (PARTITION BY data.permno ORDER BY data.jdate)
             ORDER BY data.datadate, data.permno
             ),
@@ -1015,7 +1014,7 @@ class FactorData(object):
             INNER JOIN ccm as b 
             ON CAST(f.gvkey as INT) = CAST(b.gvkey as INT)
             AND f.datadate BETWEEN b.linkdt AND b.linkenddt
-            
+
             LEFT JOIN comp.company as c 
             ON f.gvkey = c.gvkey
 
@@ -1033,13 +1032,13 @@ class FactorData(object):
             SELECT DISTINCT ON (a.fpedats, b.permno)
             a.cusip, a.fpedats, a.ticker, a.medest, a.actual, 
             CAST(b.permno as INT)
-            
+
             FROM ibes.statsum_epsus as a
-            
+
             LEFT JOIN wrdsapps.ibcrsphist as b
             ON a.ticker = b.ticker
             AND a.fpedats BETWEEN b.SDATE AND b.EDATE
-        
+
             WHERE fpi='6'
             AND a.statpers<a.ANNDATS_ACT
             AND a.measure='EPS'
@@ -1047,7 +1046,7 @@ class FactorData(object):
             AND a.fpedats is not null
             AND (a.fpedats-a.statpers)>=0
             AND b.SCORE = 1
-            
+
             ORDER BY a.fpedats, b.permno
             ),
 
@@ -1187,11 +1186,11 @@ class FactorData(object):
             ROWS BETWEEN 14 PRECEDING AND CURRENT ROW)
             ORDER BY data.jdate, data.permno
             ) as a 
-            
+
             LEFT JOIN ibes_q as b
             ON a.permno = b.permno 
             AND a.datadate = b.fpedats
-            
+
             WINDOW w as (PARTITION BY a.permno ORDER BY a.jdate
             ROWS BETWEEN 15 PRECEDING AND CURRENT ROW)
             ), 
@@ -1215,13 +1214,13 @@ class FactorData(object):
             a.meanest as fgr5yr,
             a.numest as nanalyst,
             a.meanest
-            
+
             FROM ibes.statsum_epsus as a
             INNER JOIN wrdsapps.ibcrsphist as b
-            
+
             ON a.cusip = b.NCUSIP
             AND a.statpers BETWEEN b.SDATE AND b.EDATE
-            
+
             WHERE fpi='0'
             AND a.meanest is not null
 
@@ -1252,12 +1251,12 @@ class FactorData(object):
                 THEN 1 
                 ELSE 0
                 END as m2, 
-            
+
             CASE WHEN a.oancf > a.ni
                 THEN 1 
                 ELSE 0
                 END as m3,
-            
+
             CASE WHEN a.xrdint > md.md_xrdint
                 THEN 1 
                 ELSE 0
@@ -1272,24 +1271,24 @@ class FactorData(object):
                 THEN 1 
                 ELSE 0
                 END as m6
-            
+
             FROM data_a as a
-            
+
             LEFT JOIN (
             SELECT a.sic2, a.fyear,
 
             PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY a.roa)  
             as md_roa,
-            
+
             PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY a.cfroa)  
             as md_cfroa,
 
             PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY a.xrdint)  
             as md_xrdint,
-            
+
             PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY a.capxint)  
             as md_capxint,
-    
+
             PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY a.xadint)  
             as md_xadint
 
@@ -1300,7 +1299,7 @@ class FactorData(object):
             AND a.fyear = md.fyear
 
             WINDOW w as (PARTITION BY a.sic2, a.fyear)
-            
+
             ),
 
             /* Annual forecast IBES: ibes1 */
@@ -1317,7 +1316,7 @@ class FactorData(object):
             ibes1.permno, ibes1.disp, ibes1.chfeps, ibes1.meanest,
             ibes1.numest as nanalyst, 
             ibes1.numest - LAG(ibes1.numest, 3) OVER w1 as chnanalyst
-            
+
             FROM (
             SELECT
             a.*, CAST(b.permno as INT),
@@ -1329,13 +1328,13 @@ class FactorData(object):
                 END AS disp, 
             a.meanest - LAG(a.meanest) OVER (PARTITION BY a.cusip ORDER BY 
             a.anndats_act, a.fpedats, a.statpers) as chfeps
-            
-        
+
+
             FROM ibes.statsum_epsus as a
             LEFT JOIN wrdsapps.ibcrsphist as b
             ON a.ticker = b.ticker
             AND a.statpers BETWEEN b.SDATE AND b.EDATE
-        
+
             WHERE fpi='1'
             AND a.statpers<a.ANNDATS_ACT
             AND a.measure='EPS'
@@ -1343,10 +1342,10 @@ class FactorData(object):
             AND a.fpedats is not null
             AND (a.fpedats-a.statpers)>=0
             AND b.SCORE = 1
-        
+
             ORDER BY a.cusip, a.anndats_act, a.fpedats, a.statpers
             ) as ibes1
-            
+
             WINDOW w1 as (PARTITION BY ibes1.permno ORDER BY ibes1.jdate)
             ORDER BY ibes1.jdate, ibes1.permno
             ), 
@@ -1385,18 +1384,18 @@ class FactorData(object):
 
             PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY a.roavol)  
             as md_roavol,
-            
+
             PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY a.sgrvol)  
             as md_sgrvol
 
             FROM data_q as a
             GROUP BY a.fyearq, a.fqtr, a.sic2
             ) as md 
-            
+
             ON a.fyearq = md.fyearq
             AND a.fqtr = md.fqtr
             AND a.sic2 = md.sic2
-            
+
             ), 
             data_d AS(
             SELECT 
@@ -1405,7 +1404,7 @@ class FactorData(object):
 
             ( d1.countzero + ((1/ NULLIF(d1.turn,0) )/480000))*
             21/NULLIF(d1.ndays, 0) as zerotrade
-            
+
             FROM(
             SELECT
             (date_trunc('month', date::date) + interval '1 month' * 2
@@ -1475,13 +1474,13 @@ class FactorData(object):
             ON m.permno = a.permno
             AND m.jdate >= a.jdate
             AND m.jdate < a.jdate_end
-            
+
             LEFT JOIN 
             data_q_adj as q
             ON m.permno = q.permno
             AND m.jdate >= q.jdate
             AND m.jdate < q.jdate_end_q
-            
+
             LEFT JOIN 
             ibes_0 as i
             ON m.permno = i.permno 
@@ -1491,17 +1490,17 @@ class FactorData(object):
             LEFT JOIN data_d as d
             ON m.permno = d.permno
             AND m.jdate = d.jdate
-            
+
             WHERE 
             extract(year from m.jdate) >= {self.start_yr}
             AND extract(year from m.jdate) <= {self.end_yr}
             AND m.ret is not null
-            
+
             WINDOW w as (PARTITION BY m.permno ORDER BY m.jdate)
             ORDER BY m.jdate, m.permno
             )
             SELECT * FROM out
-            
+
             """
 
         )
@@ -1519,7 +1518,7 @@ class FactorData(object):
             LAG(ewret , 2) OVER w2 as ewmkt_l2,
             LAG(ewret , 3) OVER w2 as ewmkt_l3,
             LAG(ewret , 4) OVER w2 as ewmkt_l4
-        
+
             FROM (
             SELECT b1.jdate, b1.wkdt, b1.permno, b1.wkret, 
             AVG(wkret) OVER w as ewret
@@ -1530,27 +1529,27 @@ class FactorData(object):
             + interval '1 month' * 2 - interval '1 day')::date as jdate,
             CAST(permno as INT),
             EXP(SUM(LN(NULLIF(1+GREATEST(ret, -1),0))) OVER w ) - 1 as wkret
-            
+
             FROM crsp.dsf
             WHERE extract(year from date) >= {self.start_yr - 5}
             AND permno IN {tuple(permnos)}
-        
+
             WINDOW w as (PARTITION BY date_trunc('week', date::date) , permno),
                    w2 as (PARTITION BY date_trunc('week', date::date) )
             ORDER BY wkdt, permno
             ) as b1
-                
+
             WINDOW w as (PARTITION BY b1.wkdt)
-            
+
             ORDER BY b1.wkdt, b1.permno
             ) as b2
-        
+
             WHERE wkret is not null
             AND ewret is not null
-        
+
             WINDOW w2 as (PARTITION BY permno ORDER BY wkdt)
             ) 
-        
+
             SELECT * 
             FROM beta1 
             WHERE permno IN 
@@ -1577,9 +1576,9 @@ class FactorData(object):
         data.drop(labels=['orgcap_1', 'xsga', 'cpi', 'avgat'], axis=1,
                   inplace=True)
         data['orgcap'] = data.groupby('permno')['orgcap'].ffill(limit=11)
-        self.factors = sorted(data.columns.tolist()[15:])
-        self.core = data.columns.tolist()[:15]
-        data = data[self.core+self.factors]
+        self.chars_list = sorted(data.columns.tolist()[15:])
+        core_cols = data.columns.tolist()[:15]
+        data = data[core_cols + self.chars_list]
         fred = Fred(api_key=self.fred_key)
         # Problem that WRDS does not update fredfund rate frequenyly enough
         # So we load it again, but from FRED. It is the same data
@@ -1591,7 +1590,7 @@ class FactorData(object):
         fedfunds['rf'] = fedfunds['rf'] / 100
         fedfunds['rf'] = (1 + fedfunds['rf']) ** (1 / 12) - 1
         del data['rf']
-        data['jdate'] = pd.to_datetime(data['jdate'])+MonthEnd(0)
+        data['jdate'] = pd.to_datetime(data['jdate']) + MonthEnd(0)
         data = data.merge(fedfunds, on=['jdate'], how='left')
         data['ret_ex'] = data['ret'] - data['rf']
         data['ret_adj_ex'] = data['ret_adj'] - data['rf']
@@ -1599,9 +1598,9 @@ class FactorData(object):
         data['ret_adj_ex'] = np.where(data['ret_adj_ex'] < -1, -1,
                                       data['ret_adj_ex'])
         # move rf back to the front
-        data = data[self.core+self.factors]
+        data = data[core_cols + self.chars_list]
         # remove possible infinite values
-        data[self.factors] = data[self.factors].replace(
+        data[self.chars_list] = data[self.chars_list].replace(
             [np.inf, -np.inf], np.nan)
         # size class
         data.reset_index(inplace=True, drop=True)
@@ -1629,11 +1628,11 @@ class FactorData(object):
         data['year'] = data.jdate.dt.year
         data['jyear'] = np.where(data.jdate.dt.month <= 6, data.year - 2,
                                  data.year - 1)
-        self.core = ['jdate', 'fyear', 'year', 'jyear', 'permno', 'ticker',
+        core_cols = ['jdate', 'fyear', 'year', 'jyear', 'permno', 'ticker',
                      'comnam', 'exchcd', 'exchname', 'siccd', 'indname',
                      'size_class', 'mve_m', 'rf', 'ret', 'ret_adj', 'ret_ex',
                      'ret_adj_ex']
-        data = data[self.core + self.factors]
+        data = data[core_cols + self.chars_list]
         # winsorize data: 1%, 99%
         bounded = sorted(['beta', 'ep', 'fgr5yr', 'mom12m', 'mom1m', 'mom6m',
                           'indmom', 'sue', 'agr', 'maxret', 'chfeps', 'roaq',
@@ -1644,7 +1643,7 @@ class FactorData(object):
                           'pchgm_pchsale', 'sfe', 'pchsale_pchxsga', 'mve_ia',
                           'cfp_ia', 'chinv', 'grltnoa', 'cinvest', 'tb', 'cfp',
                           'lgr', 'egr', 'pricedelay', 'grcapx', 'chmom',
-                          'cashpr',  'roeq', 'invest', 'chtx',
+                          'cashpr', 'roeq', 'invest', 'chtx',
                           'pctacc', 'operprof', 'bm_ia', 'bm'])
         data[nonneg] = data.groupby('jdate')[nonneg].apply(
             lambda x: x.clip(upper=x.quantile(wh), axis=1))
@@ -1654,54 +1653,120 @@ class FactorData(object):
                              axis=1))
         data['jdate'] = pd.to_datetime(data['jdate'])
         data.dropna(subset=['mve_m'], inplace=True)
-        self.data = data
+        data.rename({'jdate': 'date'}, inplace=True)
+        self.chars_data = data
         # save factors as json list
-        with open("./Data/factor_list.json", 'w') as f:
-            json.dump(self.factors, f, indent=2)
+        with open("./data/factor_list.json", 'w') as f:
+            json.dump(self.chars_list, f, indent=2)
         return self
 
-    def clean_data(self, dropna_cols, how='std', keep_micro=True):
+    def clean_chars(self, dropna_cols, how='std', keep_micro=True):
         valid = {'std', 'rank_norm'}
         if how not in valid:
             raise ValueError("how must be one of %r." % valid)
-        if self.data is None:
+        if self.chars_data is None:
             print('Download data first!')
-        self.data_clean = self.data.copy(deep=True)
+        self.chars_data_clean = self.chars_data.copy(deep=True)
         # drop missing values if wanted
         if dropna_cols is not None:
-            self.data_clean.dropna(subset=dropna_cols, inplace=True)
-            self.data_clean.reset_index(inplace=True, drop=True)
+            self.chars_data_clean.dropna(subset=dropna_cols, inplace=True)
+            self.chars_data_clean.reset_index(inplace=True, drop=True)
         # clean
         if not keep_micro:
-            self.data_clean = self.data_clean[
-                self.data_clean.size_class != 'Micro']
-        self.data_clean.sort_values(['jdate', 'permno'])
-        self.data_clean.reset_index(inplace=True, drop=True)
+            self.chars_data_clean = self.chars_data_clean[
+                self.chars_data_clean.size_class != 'Micro']
+        self.chars_data_clean.sort_values(['date', 'permno'])
+        self.chars_data_clean.reset_index(inplace=True, drop=True)
         if how == 'std':
-            self.data_clean[self.factors] = self.data_clean.groupby(
-                'jdate')[self.factors].transform(
-                lambda x: (x - x.mean()) / x.std()).fillna(0)
+            self.chars_data_clean[self.chars_list] = \
+                self.chars_data_clean.groupby('date')[
+                    self.chars_list].transform(
+                    lambda x: (x - x.mean()) / x.std()).fillna(0)
         elif how == 'rank_norm':
-            self.data_clean[self.factors] = self.data_clean.groupby(
-                'jdate')[self.factors].transform(
-                lambda x: (x - x.mean())).fillna(0)
-            self.data_clean[self.factors] = self.data_clean.groupby(
-                'jdate')[self.factors].transform(
+            self.chars_data_clean[self.chars_list] = \
+                self.chars_data_clean.groupby(
+                    'date')[self.chars_list].transform(
+                    lambda x: (x - x.mean())).fillna(0)
+            self.chars_data_clean[self.chars_list] = \
+                self.chars_data_clean.groupby(
+                    'date')[self.chars_list].transform(
                 lambda x: stats.norm.ppf(
                     stats.norm.cdf(-3) +
-                    (x.rank(method='first')-1) / (x.count() - 1) * (
+                    (x.rank(method='first') - 1) / (x.count() - 1) * (
                             stats.norm.cdf(3) - stats.norm.cdf(-3)))).round(7)
+            self.chars_data_clean[self.chars_list] = self.chars_data_clean[
+                                                         self.chars_list]/3
+        elif how == 'rank':
+            self.chars_data_clean[self.chars_list] = \
+                self.chars_data_clean.groupby('date')[
+                    self.chars_list].transform(
+                    lambda x: (x - x.mean())).fillna(0)
+            self.chars_data_clean[self.chars_list] = \
+                self.chars_data_clean.groupby('date')[
+                    self.chars_list].transform(
+                    lambda x: 2 / (x.shape[0]+1) * x.rank() - 1)
         return self
 
-    def save_data(self, name, key, cleaned=True):
-        print('Saving data...')
+    def ls_portfolio(self, return_col, chars, q=0.2, weight=None):
+        """
+        Constructs characteristics-sorted long/short portfolios
+        They can be constructed in 3 key ways:
+        1) equal-weighted: weight = None
+        2) value-weighted: weight = "mve_m"
+        3) score-weighted: weight = "score"
+
+        :returns
+        """
+        if self.chars_data_clean is None:
+            print('No clean data available. Clean data first!')
+            return self
+
+        if weight is None:
+            self.factors = self.chars_data.groupby('date').apply(
+                lambda x: x[chars].apply(
+                    lambda z: x[z >= z.quantile(1 - q)][return_col].mean() -
+                    x[z <= z.quantile(q)][return_col].mean()))
+            return self
+
+        elif weight == 'mve_m':
+            self.factors = self.chars_data.groupby('date').apply(
+                lambda x: x[chars].apply(lambda z: np.average(
+                    x[z >= z.quantile(1 - q)]['ret_adj_ex'],
+                    weights=x[z >= z.quantile(1 - q)]['mve_m']) - np.average(
+                    x[z <= z.quantile(q)]['ret_adj_ex'],
+                    weights=x[z <= z.quantile(q)]['mve_m'])))
+            return self
+
+        elif weight == 'score':
+            self.factors = self.chars_data.groupby('date').apply(
+                lambda x: x[chars].apply(lambda z: np.average(
+                    x[z >= z.quantile(1 - q)]['ret_adj_ex'],
+                    weights=x[z >= z.quantile(1 - q)][z.name]) - np.average(
+                    x[z <= z.quantile(q)]['ret_adj_ex'],
+                    weights=x[z <= z.quantile(q)][z.name])))
+            return self
+
+    def save_chars(self, name, key, cleaned=True):
+        print('Saving characteristics...')
         if cleaned:
-            if self.data_clean is None:
-                print('No clean data available. Clean ata first!')
+            if self.chars_data_clean is None:
+                print('No clean data available. Clean data first!')
             else:
-                self.data_clean.to_hdf(f'./Data/{name}.h5', mode='a', key=key,
-                                       format='table', data_columns=True)
+                self.chars_data_clean.to_hdf(
+                    f'./Data/{name}.h5', mode='a',
+                    key=key, format='table', data_columns=True)
         else:
-            self.data.to_hdf(f'./Data/{name}.h5', mode='a', key=key,
-                             format='table', data_columns=True)
+            self.chars_data.to_hdf(
+                f'./Data/{name}.h5', mode='a', key=key,
+                format='table', data_columns=True)
+        print('... saving done!')
+
+    def save_factors(self, name, key):
+        print('Saving factor returns...')
+
+        if self.factors is None:
+            print('No factor returns available. Construct portfolios first!')
+        else:
+            self.factors.to_hdf(f'./Data/{name}.h5', mode='a',
+                                key=key, format='table', data_columns=True)
         print('... saving done!')
