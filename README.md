@@ -65,13 +65,6 @@ data.save_data(name='factors',
                key='value')
 ```
 
-## Results ## 
-
-The plot below shows the data availability per month from January 1980 to December 2020
-
-The plot below shows the two different versions of the example book-to-market of an arbitrarily sampled stock:
-
-the plot shows the standardised and rank-normalised 
 
 ## Disclaimer ##
 Even though this code achieves a very high correlation with Jermiah Green's SAS code, I do not claim that my code is free of errors. Therefore, I am grateful for any feedback or constructive suggestion for improvement.
