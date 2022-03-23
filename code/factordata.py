@@ -1707,42 +1707,47 @@ class FactorData(object):
                     lambda x: 2 / (x.shape[0]+1) * x.rank() - 1)
         return self
 
-    def ls_portfolio(self, return_col, chars, q=0.2, weight=None):
+    def ls_portfolio(self, return_col='ret_adj_ex',
+                     chars=None, q=0.2, weight='equal'):
         """
         Constructs characteristics-sorted long/short portfolios
         They can be constructed in 3 key ways:
-        1) equal-weighted: weight = "equal"
-        2) value-weighted: weight = "value"
+        1) equal-weighted: weight = None
+        2) value-weighted: weight = "mve_m"
         3) score-weighted: weight = "score"
 
         :returns
         """
+
+        if chars is None:
+            chars = self.chars_list
+
         if self.chars_data_clean is None:
             print('No clean data available. Clean data first!')
             return self
 
-        if weight is None:
+        if weight == 'equal':
             self.factors = self.chars_data.groupby('date').apply(
                 lambda x: x[chars].apply(
                     lambda z: x[z >= z.quantile(1 - q)][return_col].mean() -
                     x[z <= z.quantile(q)][return_col].mean()))
             return self
 
-        elif weight == 'mve_m':
+        elif weight == 'value':
             self.factors = self.chars_data.groupby('date').apply(
                 lambda x: x[chars].apply(lambda z: np.average(
-                    x[z >= z.quantile(1 - q)]['ret_adj_ex'],
+                    x[z >= z.quantile(1 - q)][return_col],
                     weights=x[z >= z.quantile(1 - q)]['mve_m']) - np.average(
-                    x[z <= z.quantile(q)]['ret_adj_ex'],
+                    x[z <= z.quantile(q)][return_col],
                     weights=x[z <= z.quantile(q)]['mve_m'])))
             return self
 
         elif weight == 'score':
             self.factors = self.chars_data.groupby('date').apply(
                 lambda x: x[chars].apply(lambda z: np.average(
-                    x[z >= z.quantile(1 - q)]['ret_adj_ex'],
+                    x[z >= z.quantile(1 - q)][return_col],
                     weights=x[z >= z.quantile(1 - q)][z.name]) - np.average(
-                    x[z <= z.quantile(q)]['ret_adj_ex'],
+                    x[z <= z.quantile(q)][return_col],
                     weights=x[z <= z.quantile(q)][z.name])))
             return self
 
