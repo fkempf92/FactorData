@@ -6,7 +6,7 @@ setuptools.setup(
     author='Felix Kempf',
     author_email='felix.kempf@kcl.ac.uk',
     description='Constructs 103 US firm-level firm characteristics and corresponding L/S portfolios',
-    url='https://github.com/fkempf92/taktile',
+    url='https://github.com/fkempf92/FactorData',
     project_urls = {
         "Bug Tracker": "https://github.com/fkempf92/FactorData/issues"
     },
