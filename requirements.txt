@@ -1,6 +1,4 @@
-datetime >= 3.8
 bls >= 0.3.0
-warnings >= 3.8
 json >= 2.0.9
 pandas >= 1.0.5
 numpy >= 1.18.5
