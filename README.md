@@ -6,6 +6,17 @@ While I was working on my own research, I noticed that I would like to be able t
 
 My code provides a simple Python class that downloads, calculates, cleans and saves 103 firm characteristics using data from CRSP, Compustat, I/B/E/S, BLS and FRED. In particular, I follow the variable definitions used by Jeremiah Green and my code achieves an overall median correlation of 98.8% with Green's data. I acknowledge that there may exist diverging variable definitions, such as those used by Hou et al. 2020. I will leave alternative variable definitions to future updates. 
 
+## Installation ##
+
+## Installing
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install factordata like below. 
+The repository may be private and an installation may require a token!
+
+```bash
+pip install git+https://github.com/fkempf92/FactorData.git
+```
+
+
 ## Notable differences ##
 While my overall correlation with Green's data is very high, there are some notable differences in variables definitions as well as generally diverging aspects which I would like to point out. Note that everyone can change the code in a way that suits best their own needs. This respirotry is merely a suggestion! 
 1. I perform industry adjustments after the CRSP-Compustat merge not before
@@ -33,7 +44,7 @@ For this code to work, there are three key requirements:
 3. You must have a valid FRED account with access key (see https://research.stlouisfed.org/docs/api/api_key.html)
 
 
-## Example ##
+## Usage ##
 
 ```python
 # Set account details and start year
