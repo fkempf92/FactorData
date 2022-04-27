@@ -12,7 +12,7 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install factord
 The repository may be private and an installation may require a token!
 
 ```bash
-pip install git+https://github.com/fkempf92/factordata.git
+pip install git+https://github.com/fkempf92/FactorData.git
 ```
 
 ## Remarks ##
