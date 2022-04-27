@@ -13,7 +13,7 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install factord
 The repository may be private and an installation may require a token!
 
 ```bash
-pip install git+https://github.com/fkempf92/FactorData.git
+pip install git+https://github.com/fkempf92/factordata.git
 ```
 
 
@@ -47,6 +47,8 @@ For this code to work, there are three key requirements:
 ## Usage ##
 
 ```python
+from factordata import FactorData
+
 # Set account details and start year
 data = FactorData(wrds_username='janedoe', 
                   bls_key='1234', 
