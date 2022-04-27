@@ -17,6 +17,6 @@ setuptools.setup(
                       'numpy >= 1.18.5',
                       'wrds >= 3.1.1',
                       'scipy >= 1.5.0', 
-                      'statsmoderls >= 0.11.1',
+                      'statsmodels >= 0.11.1',
                       'fredapi >= 0.5.0'],
 )
