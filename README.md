@@ -53,7 +53,7 @@ data = FactorData(wrds_username='janedoe',
 data.get_data()
 
 # Clean data
-data.clean_data(dropna_cols=['mve', 'bm', 'mom1m'], 
+data.clean_chars(dropna_cols=['mve', 'bm', 'mom1m'], 
                 how='std', 
                 keep_micro=True)
                 
